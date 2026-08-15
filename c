@@ -3,9 +3,9 @@
 # c - compile the program into ./play (Linux and macOS)
 #
 # Everything is compiled from src/ in one go: main.cpp (our code, which also
-# pulls in miniaudio.h) plus RtMidi_backend.cpp (the MIDI library; it picks
-# the right system MIDI API for the platform by itself). The only thing that
-# differs per platform is which system libraries we link against.
+# pulls in miniaudio.h) plus RtMidi.cpp (the MIDI library). RtMidi has to be
+# told which system MIDI API to use, so we look at the platform (uname) and
+# pass the matching -D define, plus the system libraries to link against.
 
 Pdir=$PWD
 cd src
@@ -13,16 +13,18 @@ cd src
 case "$(uname)" in
   Darwin)
     # macOS: RtMidi uses CoreMIDI, miniaudio uses CoreAudio - all part of macOS.
+    MIDI_FLAGS="-D__MACOSX_CORE__"
     MIDI_LIBS="-framework CoreMIDI -framework CoreAudio -framework CoreFoundation"
     ;;
   *)
     # Linux: RtMidi uses ALSA, which needs the ALSA development files (see below).
+    MIDI_FLAGS="-D__LINUX_ALSA__"
     MIDI_LIBS="-lasound"
     ;;
 esac
 
 echo "Compiling program for $(uname)"
-if g++ -std=c++17 -O2 $CXXFLAGS main.cpp RtMidi_backend.cpp -o ../play \
+if g++ -std=c++17 -O2 $MIDI_FLAGS $CXXFLAGS main.cpp RtMidi.cpp -o ../play \
        $LDFLAGS $MIDI_LIBS -lpthread -ldl -lm; then
   strip ../play
 else

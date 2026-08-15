@@ -32,8 +32,9 @@
     macOS   RtMidi uses CoreMIDI and miniaudio uses CoreAudio, both part of
             the system; only the Xcode command line tools are needed
             (xcode-select --install).
-  The platform choice for RtMidi is made in RtMidi_backend.cpp; the few
-  platform differences in this file are marked with #if defined(__APPLE__).
+  ./c tells RtMidi which system MIDI API to use (-D__LINUX_ALSA__ or
+  -D__MACOSX_CORE__); the few platform differences in this file are marked
+  with #if defined(__APPLE__).
 
   Note: if the keyboard is unplugged and plugged back in while the program
   runs, the connection to it is lost. Just quit (Enter) and start it again.
